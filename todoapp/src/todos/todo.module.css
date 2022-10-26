@@ -1,0 +1,12 @@
+.formContainer{
+    margin: auto;
+    padding: 10px;
+    background-color: bisque;
+    width: 40%;
+    border: 3px solid blue;
+    border-radius: 10px;
+}
+
+.form{
+    display: inline-flex;
+}
