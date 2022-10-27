@@ -15,9 +15,7 @@ const Todo = (props) => {
 
     const onChange = (event) => {
         if(event.target.name === "isCompleted"){
-           const { checked } = event.target;
-           if(checked) setValues({...values, [values.isCompleted]: event.target.checked});
-           else setValues({...values, [values.isCompleted]: event.target.checked});
+            setValues({...values, [values.isCompleted]: event.target.checked});   
         }
         setValues({ ...values, [event.target.name]: event.target.value });
     }
