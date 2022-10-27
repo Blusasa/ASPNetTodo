@@ -1,37 +1,51 @@
-import logo from './logo.svg';
 import './App.css';
 import Todo from './todos/todoForm';
-import TodoDisplay from './todos/todoDisplay';
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useEffect, useState, Fragment } from 'react';
+import axios from "axios";
 
 function App() {
-  return (
-    <div className="App">
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
-      <div className="App-title">
-      <h1 className="text-danger border-bottom border-danger border-3">TODO App</h1>
-      </div>
-      <br></br>
-      <h3 className="mb-3 text-warning">New Todo:</h3>
-      <Todo data={{id: '', taskName: '', isCompleted: false}}></Todo>
-      <br></br>
-      <h3 className="mb-3 text-warning">All Todos:</h3>
-      <Todo data={{id: 1, taskName: 'Walk Dog', isCompleted: true}}></Todo>
-    </div>
+  const [todos, setTodos] = useState(null);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
+  const onUpdate = () => {
+    console.log("update happened");
+    setFormSubmitted(!formSubmitted);
+  }
+
+  useEffect(() => {
+    axios.get("https://localhost:7271/api/todoItems/GetList/")
+      .then(res => {
+        console.log("effect ran");
+        setTodos(res.data);
+      }).then(() => console.log(todos))
+      .catch(err => console.log(err.toJSON()));
+  }, [formSubmitted])
+
+  return (
+    <Fragment>
+      {todos === null ? <div></div> :
+        <div className="App">
+          <div className="App-title">
+            <h1 className="text-danger border-bottom border-danger border-3">TODO App</h1>
+          </div>
+          <br></br>
+          <div className="App-section">
+            <h3 className="border-bottom border-warning border-3 text-warning">New Todo:</h3>
+          </div>
+          <Todo data={{ id: '', taskName: '', isCompleted: false }} onUpdate={onUpdate}></Todo>
+          <br></br>
+          <br></br>
+          <div className="App-section">
+            <h3 className="border-bottom border-warning border-3 text-warning text-warning">All Todos:</h3>
+          </div>
+          {todos.map((todo) => {
+            return (<Fragment><Todo data={todo} onUpdate={onUpdate}/><br></br></Fragment>)
+          })
+          }
+        </div>
+      }
+    </Fragment>
   );
 }
 

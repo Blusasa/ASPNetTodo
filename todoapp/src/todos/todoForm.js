@@ -2,38 +2,58 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from "./todo.module.css";
+import axios from "axios";
 
 const Todo = (props) => {
 
     const [values, setValues] = useState(props.data);
-
     const [disabled, setDisabled] = useState(() => { if (values.id === '') return false; else return true; });
     const [inEdit, setInEdit] = useState(false);
+    const formBtnTargeted = useRef();
 
     const onChange = (event) => {
-        setValues({ ...values, [event.name]: event.value });
+        if(event.target.name === "isCompleted"){
+           const { checked } = event.target;
+           if(checked) setValues({...values, [values.isCompleted]: event.target.checked});
+           else setValues({...values, [values.isCompleted]: event.target.checked});
+        }
+        setValues({ ...values, [event.target.name]: event.target.value });
     }
+
+    useEffect(() => {
+        console.log("ID: " + values.id + ", Task Name: " + values.taskName + ", Completed: " + values.isCompleted);
+    }, [values])
 
     const onEditClick = () => {
         setInEdit(!inEdit);
         setDisabled(!disabled);
     }
 
+    const onDelete = () => {
+        axios.delete("https://localhost:7271/api/TodoItems/DeleteItem/" + values.id)
+        .then(res => {if(res.status == 200) props.onUpdate()})
+        .catch(err => console.log(err));
+    }
+
     const onSubmit = (e) => {
         e.preventDefault();
-        console.log(e.target);
-        if(e.target.name === "update"){
+        if(formBtnTargeted.current === "update"){
             onEditClick();
+            props.onUpdate();
+        }else if(formBtnTargeted.current === "submit"){
+            axios.post("https://localhost:7271/api/TodoItems", values)
+            .then(res => console.log(res))
+            .catch(err => console.log(err))
+            props.onUpdate();
+            e.target.reset();
+
         }
     }
 
-
-    console.log("Form disabled: " + disabled + ", " + "Form in edit mode: " + inEdit);
-
     return (
-        <div className={styles.formContainer}>
+        <div className={values.isCompleted ? styles.formContainerDone : styles.formContainerTodo}>
             <Form className={styles.form} onSubmit={onSubmit}>
                 <Row className="m-1">
                     <Col sm={7}>
@@ -44,7 +64,7 @@ const Todo = (props) => {
                                 disabled={disabled}
                                 name="taskName"
                                 onChange={onChange}
-                                value={values.id}
+                                defaultValue={values.name}
                             />
                         </Form.Group>
                     </Col>
@@ -52,25 +72,28 @@ const Todo = (props) => {
                         <Form.Group className="flex-grow-1" as={Col} controlID="isCompleted">
                             <Form.Label className="fs-5 fw-bold badge rounded-pill text-bg-dark align-self-start">Completed</Form.Label>
                             <Form.Check
+                                type="checkbox"
                                 className="mt-1"
                                 disabled={disabled}
                                 name="isCompleted"
                                 onChange={onChange}
-                                value={values.isCompleted}
+                                defaultChecked={values.isCompleted}
                             />
                         </Form.Group>
                     </Col>
                     {values.id === '' ? 
                         <Col className="d-flex align-items-center justify-content-center">
-                            <Button name="submit" variant="primary" type="Submit">Submit</Button>
+                            <Button key="submitBtn" name="submit" variant="primary" type="Submit" onClick={() => formBtnTargeted.current = "submit"}>Submit</Button>
                         </Col>
                         : disabled === true ?
-                            <Col className="d-flex align-items-center justify-content-center">
-                                <Button onClick={onEditClick}>Edit</Button>
+                            <Col className="d-flex flex-column align-items-center justify-content-around">
+                                <Button key="editBtn" onClick={onEditClick}>Edit</Button>
+                                <Button key="deleteBtn" onClick={onDelete}>Delete</Button>
                             </Col>
                         : inEdit === true ?
-                            <Col className="d-flex align-items-center justify-content-center">
-                                <Button name="update" variant="primary" type="Submit">Update</Button>
+                            <Col className="d-flex flex-column align-items-center justify-content-around">
+                                <Button key="updateBtn" name="update" variant="primary" type="Submit" onClick={() => formBtnTargeted.current = "update"}>Update</Button>
+                                <Button key="deleteBtn" onClick={onDelete}>Delete</Button>
                             </Col> : <div></div>
                     }
                 </Row>

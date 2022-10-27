@@ -1,12 +1,16 @@
 .App {
   text-align: center;
   background-color: #282c34;
-  height: 100vh;
 }
 
 .App-title{
   margin: auto;
   width: 30vw;
+}
+
+.App-section{
+  margin: auto;
+  width: 20vw;
 }
 
 .App-logo {

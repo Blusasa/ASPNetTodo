@@ -1,4 +1,4 @@
-.formContainer{
+.formContainerTodo{
     margin: auto;
     padding: 10px;
     background-color: bisque;
@@ -7,8 +7,23 @@
     border-radius: 10px;
 }
 
+.formContainerDone{
+    margin: auto;
+    padding: 10px;
+    background-color: green;
+    width: 40%;
+    border: 3px solid #ffc000;
+    border-radius: 10px;
+}
+
 .form{
     padding: 0px 15px 0px 15px;
+}
+
+
+
+.input{
+    text-align: center;
 }
 
 .input:disabled{
