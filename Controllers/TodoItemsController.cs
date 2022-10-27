@@ -9,25 +9,19 @@ namespace TodoAPI.Controllers
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
-        private ICollection<TodoItem> items;
+        private TodoDataStore dataStore;
 
-        public TodoItemsController(TodoContext context)
+        public TodoItemsController()
         {
-            items = new List<TodoItem>();
-            items.Add(new TodoItem{ Id = 1, Name = "Walk the dog", IsComplete = false });
-            items.Add(new TodoItem{Id = 2, Name = "Clean Room", IsComplete = false});
-            items.Add(new TodoItem{Id = 3, Name = "Run errands", IsComplete = false});
-            items.Add(new TodoItem{Id = 4, Name = "Fix yard", IsComplete = false});
-            items.Add(new TodoItem{Id = 5, Name = "Change oil", IsComplete = false});
-            items.Add(new TodoItem{Id = 6, Name = "Finish Project", IsComplete = false});
+            dataStore = TodoDataStore.getInstance();
         }
 
         //GET: api/TodoItems/GetList
         [HttpGet]
         [Route("GetList")]
-        public ICollection<TodoItem> getTodoList(){
-            Console.WriteLine(items.Count);
-            return items;
+        public IList<TodoItem> getTodoList(){
+            Console.WriteLine(dataStore.getItems().Count);
+            return dataStore.getItems();
         }
 
         // GET: api/TodoItems/GetItem/5
@@ -35,8 +29,8 @@ namespace TodoAPI.Controllers
         [Route("GetItem/{id}")]
         public ActionResult<TodoItem> GetTodoItem(long id)
         {
-            foreach(TodoItem item in items){
-                if(item.Id == id){
+            foreach(TodoItem item in dataStore.getItems()){
+                if(item.id == id){
                     return item;
                 }
             }
@@ -47,15 +41,13 @@ namespace TodoAPI.Controllers
         // PUT: api/TodoItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
-        [Route("CreateItem/{id}")]
-        public ActionResult PutTodoItem(long id, TodoItem todoItem)
+        [Route("UpdateItem/{id}")]
+        public ActionResult PutTodoItem([FromRouteAttribute]long id, [FromBody]TodoItem todoItem)
         {
-            if (id != todoItem.Id){
-                return BadRequest();
-            }
-            
-            items.Remove(todoItem);
-            items.Add(todoItem);
+            Console.WriteLine("update");
+            TodoItem item = dataStore.getItems().Where(i => i.id == id).First();
+            dataStore.getItems().Remove(item);
+            dataStore.getItems().Add(todoItem);
 
             return new OkResult();
         }
@@ -63,10 +55,13 @@ namespace TodoAPI.Controllers
         // POST: api/TodoItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Route("UpdateItem")]
-        public ActionResult PostTodoItem(TodoItem todoItem)
+        [Route("CreateItem")]
+        public ActionResult PostTodoItem([FromBody] TodoItem todoItem)
         {
-            items.Add(todoItem);
+            int id = getNextID();
+            todoItem.id = id;
+            Console.WriteLine(todoItem.name + " " + todoItem.id);
+            dataStore.getItems().Add(todoItem);
             return new OkResult();
         }
 
@@ -75,30 +70,25 @@ namespace TodoAPI.Controllers
         [Route("DeleteItem/{id}")]
         public ActionResult DeleteTodoItem(long id)
         {   
-            bool itemRemoved = false;
-            foreach(TodoItem item in items){
+            Boolean itemRemoved = false;
+            for(int i = 0; i < dataStore.getItems().Count(); i++){
+                TodoItem item = dataStore.getItems()[i];
                 if(itemRemoved){
-                    item.Id--;
+                    item.id--;
                     continue;
                 }
-
-                if(item.Id == id){
-                    Console.WriteLine("Match Found");
-                    Console.WriteLine(items.Count);
-                    items.Remove(item);
-                    Console.WriteLine(items.Count);
-                    return new OkResult();
+                if(item.id == id){
+                    dataStore.getItems().Remove(item);
+                    itemRemoved = true;
                 }
-
             }
-            
 
-            return NotFound();
+            return itemRemoved ? new OkResult() : NotFound();
         }
 
-        private bool TodoItemExists(long id)
+        private int getNextID()
         {
-            return items.Where(i => i.Id == id).Any();
+            return dataStore.getItems().Count() + 1;
         }
     }
 }

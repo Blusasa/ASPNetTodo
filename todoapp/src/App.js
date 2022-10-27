@@ -9,16 +9,14 @@ function App() {
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   const onUpdate = () => {
-    console.log("update happened");
     setFormSubmitted(!formSubmitted);
   }
 
   useEffect(() => {
     axios.get("https://localhost:7271/api/todoItems/GetList/")
       .then(res => {
-        console.log("effect ran");
         setTodos(res.data);
-      }).then(() => console.log(todos))
+      })
       .catch(err => console.log(err.toJSON()));
   }, [formSubmitted])
 
@@ -33,14 +31,14 @@ function App() {
           <div className="App-section">
             <h3 className="border-bottom border-warning border-3 text-warning">New Todo:</h3>
           </div>
-          <Todo data={{ id: '', taskName: '', isCompleted: false }} onUpdate={onUpdate}></Todo>
+          <Todo data={{ id: 0, name: '', isCompleted: false }} onUpdate={onUpdate}></Todo>
           <br></br>
           <br></br>
           <div className="App-section">
             <h3 className="border-bottom border-warning border-3 text-warning text-warning">All Todos:</h3>
           </div>
           {todos.map((todo) => {
-            return (<Fragment><Todo data={todo} onUpdate={onUpdate}/><br></br></Fragment>)
+            return (<Fragment key={todo.name+todo.id}><Todo data={todo} onUpdate={onUpdate}/><br></br></Fragment>)
           })
           }
         </div>

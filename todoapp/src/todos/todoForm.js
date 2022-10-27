@@ -9,7 +9,7 @@ import axios from "axios";
 const Todo = (props) => {
 
     const [values, setValues] = useState(props.data);
-    const [disabled, setDisabled] = useState(() => { if (values.id === '') return false; else return true; });
+    const [disabled, setDisabled] = useState(() => { if (values.id === 0) return false; else return true; });
     const [inEdit, setInEdit] = useState(false);
     const formBtnTargeted = useRef();
 
@@ -21,10 +21,6 @@ const Todo = (props) => {
         }
         setValues({ ...values, [event.target.name]: event.target.value });
     }
-
-    useEffect(() => {
-        console.log("ID: " + values.id + ", Task Name: " + values.taskName + ", Completed: " + values.isCompleted);
-    }, [values])
 
     const onEditClick = () => {
         setInEdit(!inEdit);
@@ -40,15 +36,18 @@ const Todo = (props) => {
     const onSubmit = (e) => {
         e.preventDefault();
         if(formBtnTargeted.current === "update"){
+            console.log("Update");
             onEditClick();
+            axios.put("https://localhost:7271/api/TodoItems/UpdateItem/"+ values.id, values)
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
             props.onUpdate();
         }else if(formBtnTargeted.current === "submit"){
-            axios.post("https://localhost:7271/api/TodoItems", values)
+            e.target.reset();
+            axios.post("https://localhost:7271/api/TodoItems/CreateItem", values)
             .then(res => console.log(res))
             .catch(err => console.log(err))
             props.onUpdate();
-            e.target.reset();
-
         }
     }
 
@@ -57,19 +56,19 @@ const Todo = (props) => {
             <Form className={styles.form} onSubmit={onSubmit}>
                 <Row className="m-1">
                     <Col sm={7}>
-                        <Form.Group controlID="taskName">
+                        <Form.Group>
                             <Form.Label className="fs-5 fw-bold badge rounded-pill text-bg-dark align-self-start">Task Name: </Form.Label>
                             <Form.Control
                                 className={styles.input}
                                 disabled={disabled}
-                                name="taskName"
+                                name="name"
                                 onChange={onChange}
                                 defaultValue={values.name}
                             />
                         </Form.Group>
                     </Col>
                     <Col className="flex-grow-1 d-flex">
-                        <Form.Group className="flex-grow-1" as={Col} controlID="isCompleted">
+                        <Form.Group className="flex-grow-1" as={Col}>
                             <Form.Label className="fs-5 fw-bold badge rounded-pill text-bg-dark align-self-start">Completed</Form.Label>
                             <Form.Check
                                 type="checkbox"
@@ -81,7 +80,7 @@ const Todo = (props) => {
                             />
                         </Form.Group>
                     </Col>
-                    {values.id === '' ? 
+                    {values.id === 0 ? 
                         <Col className="d-flex align-items-center justify-content-center">
                             <Button key="submitBtn" name="submit" variant="primary" type="Submit" onClick={() => formBtnTargeted.current = "submit"}>Submit</Button>
                         </Col>
