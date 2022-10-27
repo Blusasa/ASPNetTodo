@@ -3,10 +3,16 @@
     padding: 10px;
     background-color: bisque;
     width: 40%;
-    border: 3px solid blue;
+    border: 3px solid red;
     border-radius: 10px;
 }
 
 .form{
-    display: inline-flex;
+    padding: 0px 15px 0px 15px;
+}
+
+.input:disabled{
+    background-color: transparent;
+    border: none;
+    text-align: center;
 }

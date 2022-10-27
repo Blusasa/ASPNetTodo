@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import Todo from './todos/todoForm';
 import TodoDisplay from './todos/todoDisplay';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   return (
@@ -20,11 +21,15 @@ function App() {
           Learn React
         </a>
       </header> */}
-      <h1>TODO App</h1>
+      <div className="App-title">
+      <h1 className="text-danger border-bottom border-danger border-3">TODO App</h1>
+      </div>
       <br></br>
-      <Todo></Todo>
+      <h3 className="mb-3 text-warning">New Todo:</h3>
+      <Todo data={{id: '', taskName: '', isCompleted: false}}></Todo>
       <br></br>
-      <TodoDisplay></TodoDisplay>
+      <h3 className="mb-3 text-warning">All Todos:</h3>
+      <Todo data={{id: 1, taskName: 'Walk Dog', isCompleted: true}}></Todo>
     </div>
 
   );
